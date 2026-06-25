@@ -22,13 +22,10 @@ class TestTextNode(unittest.TestCase):
             props={"href": "https://www.google.com"},
         )
 
-        expected = (
-            "Current node: <a>\n"
-            "        some text\n"
-            "        Props:\n"
-            '            href="https://www.google.com"\n'
+        self.assertEqual(
+            repr(node),
+            "LeafNode(tag='a', value='some text', props={'href': 'https://www.google.com'})",
         )
-        self.assertEqual(repr(node), expected)
 
     def test_props_to_html(self):
         node = LeafNode(

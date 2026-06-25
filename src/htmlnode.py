@@ -12,21 +12,7 @@ class HTMLNode:
         self.props = props
 
     def __repr__(self) -> str:
-        children = (
-            "\n".join(f"            {child}" for child in self.children)
-            if self.children
-            else "            No children"
-        )
-        props = self.props_to_html() if self.props else "No props"
-
-        return (
-            f"Current node: <{self.tag}>\n"
-            f"        {self.value if self.value else 'No value'}\n"
-            f"        Children:\n"
-            f"{children}\n"
-            f"        Props:\n"
-            f"           {props}\n"
-        )
+        return f"HTMLNode(tag{self.tag!r}, value={self.value!r}, children={self.children!r}, prop={self.props!r})"
 
     def to_html(self):
         raise NotImplementedError
