@@ -40,7 +40,7 @@ class TestTextNode(unittest.TestCase):
 
         self.assertEqual(
             repr(parent_node),
-            "HTMLNode(tag'a', value=None, children=[LeafNode(tag='span', value='child', props=None)], prop={'href': 'https://www.google.com'})",
+            "HTMLNode(tag'a', value=None, children=[LeafNode(tag='span', value='child', props={})], prop={'href': 'https://www.google.com'})",
         )
 
     def test_props_to_html(self):

@@ -9,7 +9,7 @@ class HTMLNode:
         self.tag = tag
         self.value = value
         self.children = children
-        self.props = props
+        self.props = props or {}
 
     def __repr__(self) -> str:
         return f"HTMLNode(tag{self.tag!r}, value={self.value!r}, children={self.children!r}, prop={self.props!r})"
