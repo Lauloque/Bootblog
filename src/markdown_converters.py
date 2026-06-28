@@ -100,12 +100,3 @@ def markdown_to_blocks(text: str) -> list[str]:
             continue
         blocks.append(block)
     return blocks
-
-
-md = """
-This is a paragraph
-
-
-This is another paragraph
-"""
-print(markdown_to_blocks(md))
