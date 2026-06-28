@@ -3,6 +3,7 @@ import unittest
 from markdown_converters import (
     extract_markdown_images,
     extract_markdown_links,
+    markdown_to_blocks,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -207,6 +208,40 @@ class TestTextToTextnodes(unittest.TestCase):
         expected = [TextNode(text, TextType.TEXT)]
 
         self.assertListEqual(text_to_textnodes(text), expected)
+
+
+class TestMarkdown2Blocks(unittest.TestCase):
+    def test_all_in_one(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+
+        expected = [
+            "This is **bolded** paragraph",
+            "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+            "- This is a list\n- with items",
+        ]
+
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, expected)
+
+    def test_empty_blocks(self):
+        md = """
+This is a paragraph
+
+
+This is another paragraph
+"""
+
+        expected = ["This is a paragraph", "This is another paragraph"]
+        blocks = markdown_to_blocks(md)
+        self.assertListEqual(blocks, expected)
 
 
 if __name__ == "__main__":
