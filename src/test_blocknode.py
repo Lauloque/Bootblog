@@ -1,5 +1,4 @@
 import unittest
-from re import L
 
 from blocknode import (
     BlockType,

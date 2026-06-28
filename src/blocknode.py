@@ -1,8 +1,6 @@
 import re
 from enum import Enum
 
-from leafnode import LeafNode
-
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
