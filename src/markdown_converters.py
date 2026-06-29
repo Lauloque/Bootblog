@@ -1,8 +1,10 @@
 import re
 from enum import Enum
 
-from src.htmlnode import HTMLNode
-from textnode import TextNode, TextType
+from htmlnode import HTMLNode
+from leafnode import LeafNode
+from parentnode import ParentNode
+from textnode import TextNode, TextType, text_node_to_html_node
 
 
 class BlockType(Enum):
@@ -123,6 +125,14 @@ def text_to_textnodes(text: str) -> list[TextNode]:
     return nodes
 
 
+def text_to_children(text: str) -> list[LeafNode]:
+    textnode_list = text_to_textnodes(text)
+
+    htmlnode_list = [text_node_to_html_node(textnode) for textnode in textnode_list]
+
+    return htmlnode_list
+
+
 def markdown_to_blocks(text: str) -> list[str]:
     blocks = []
 
@@ -132,3 +142,72 @@ def markdown_to_blocks(text: str) -> list[str]:
             continue
         blocks.append(block)
     return blocks
+
+
+def markdown_to_html_node(markdown: str) -> ParentNode:
+    markdown_blocks = markdown_to_blocks(markdown)
+
+    block_nodes = []
+    for block in markdown_blocks:
+        block_type = block_to_block_type(block)
+
+        match block_type:
+            case BlockType.PARAGRAPH:
+                block = block.replace("\n", " ")
+                html_nodes_list = text_to_children(block) or None
+                block_nodes.append(
+                    ParentNode(
+                        "p",
+                        children=(html_nodes_list),
+                    )
+                )
+
+            case BlockType.HEADING:
+                heading_level = re.search(r"^(#{1,6})", block)
+                assert heading_level is not None, "Expected a heading block"
+
+                block = re.sub(r"^\#+\s", "", block, flags=re.MULTILINE)
+                html_nodes_list = text_to_children(block) or None
+                block_nodes.append(
+                    ParentNode(
+                        f"h{len(heading_level.group(1))}",
+                        children=(html_nodes_list),
+                    )
+                )
+
+            case BlockType.CODE:
+                block = re.sub(r"^```\n?", "", block, flags=re.MULTILINE)
+                block_nodes.append(
+                    ParentNode("pre", [ParentNode("code", [LeafNode(None, block)])])
+                )
+
+            case BlockType.QUOTE:
+                block = re.sub(r"^> ?", "", block, flags=re.MULTILINE)
+                block = block.replace("\n", " ")
+                html_nodes_list = text_to_children(block) or None
+                block_nodes.append(
+                    ParentNode(
+                        "blockquote",
+                        children=(html_nodes_list),
+                    )
+                )
+
+            case BlockType.UNORDERED_LIST:
+                block = re.sub(r"^- ", "", block, flags=re.MULTILINE)
+                children_text = block.split("\n")
+                children_nodes = []
+                for child in children_text:
+                    grandchildren = text_to_children(child) or None
+                    children_nodes.append(ParentNode("li", grandchildren))
+                block_nodes.append(ParentNode("ul", children_nodes))
+
+            case BlockType.ORDERED_LIST:
+                block = re.sub(r"^\d+\. ", "", block, flags=re.MULTILINE)
+                children_text = block.split("\n")
+                children_nodes = []
+                for child in children_text:
+                    grandchildren = text_to_children(child) or None
+                    children_nodes.append(ParentNode("li", grandchildren))
+                block_nodes.append(ParentNode("ol", children_nodes))
+
+    return ParentNode(tag="div", children=block_nodes)

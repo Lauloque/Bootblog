@@ -6,6 +6,7 @@ from markdown_converters import (
     extract_markdown_images,
     extract_markdown_links,
     markdown_to_blocks,
+    markdown_to_html_node,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -214,15 +215,13 @@ class TestTextToTextnodes(unittest.TestCase):
 
 class TestMarkdown2Blocks(unittest.TestCase):
     def test_all_in_one(self):
-        md = """
-This is **bolded** paragraph
+        md = """This is **bolded** paragraph
 
 This is another paragraph with _italic_ text and `code` here
 This is the same paragraph on a new line
 
 - This is a list
-- with items
-"""
+- with items"""
 
         expected = [
             "This is **bolded** paragraph",
@@ -339,6 +338,84 @@ some code that doesn't end
         for case in cases:
             with self.subTest(case=case):
                 self.assertNotEqual(block_to_block_type(case), BlockType.ORDERED_LIST)
+
+
+class TestBlock2HTML(unittest.TestCase):
+    def test_all(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+> This is a quote > with a `code` inline.
+
+```
+a code block
+with line return
+```
+
+- unordered
+- lis**ttt**
+
+1. ordered
+2. lis_ttt_
+
+# heading
+
+## heading
+
+### heading
+
+#### heading
+
+##### heading
+
+###### heading
+
+####### fake heading
+"""
+
+        expected = "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p><blockquote>This is a quote > with a <code>code</code> inline.</blockquote><pre><code>a code block\nwith line return\n</code></pre><ul><li>unordered</li><li>lis<b>ttt</b></li></ul><ol><li>ordered</li><li>lis<i>ttt</i></li></ol><h1>heading</h1><h2>heading</h2><h3>heading</h3><h4>heading</h4><h5>heading</h5><h6>heading</h6><p>####### fake heading</p></div>"
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(html, expected)
+
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+        expected = "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>"
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            expected,
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        expected = "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>"
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            expected,
+        )
 
 
 if __name__ == "__main__":
