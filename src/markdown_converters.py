@@ -72,7 +72,8 @@ def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
         for img in md_images:
             (img_alt, img_url) = img
             before, after = temp_text.split(f"![{img_alt}]({img_url})", 1)
-            new_nodes.append(TextNode(before, TextType.TEXT))
+            if before:
+                new_nodes.append(TextNode(before, TextType.TEXT))
             new_nodes.append(TextNode(img[0], TextType.IMAGE, img[1]))
             temp_text = after
         if temp_text:
@@ -96,7 +97,8 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
         for link in md_links:
             (link_alt, link_url) = link
             before, after = temp_text.split(f"[{link_alt}]({link_url})", 1)
-            new_nodes.append(TextNode(before, TextType.TEXT))
+            if before:
+                new_nodes.append(TextNode(before, TextType.TEXT))
             new_nodes.append(TextNode(link[0], TextType.LINK, link[1]))
             temp_text = after
         if temp_text:
