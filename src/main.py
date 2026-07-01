@@ -1,6 +1,5 @@
 import re
 import shutil
-from logging import raiseExceptions
 from os import getcwd, listdir, makedirs, mkdir, path
 
 from markdown_converters import markdown_to_html_node
@@ -34,6 +33,22 @@ def get_file_content_str(path: str) -> str:
         return f.read()
 
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path) -> None:
+
+    dir_content = listdir(dir_path_content)
+    for content in dir_content:
+        from_path = path.join(dir_path_content, content)
+        dest_path = path.join(dest_dir_path, content)
+        if path.isfile(from_path):
+            root, ext = path.splitext(dest_path)
+            if ext == ".md":
+                generate_page(from_path, template_path, root + ".html")
+            else:
+                continue
+        else:
+            generate_pages_recursive(from_path, template_path, dest_path)
+
+
 def generate_page(from_path, template_path, dest_path) -> None:
     print(
         f"Generating page from '{from_path}' to '{dest_path}' using '{template_path}'"
@@ -64,11 +79,11 @@ def main():
     copy_files_in_dir(static_dir, public_dir)
 
     # generate index
-    index_md_path = path.join(cwd, "content", "index.md")
-    output_index_path = path.join(cwd, "public", "index.html")
-    template_file_path = path.join(cwd, "template.html")
+    from_path = path.join(cwd, "content")
+    dset_path = path.join(cwd, "public")
+    template__path = path.join(cwd, "template.html")
 
-    generate_page(index_md_path, template_file_path, output_index_path)
+    generate_pages_recursive(from_path, template__path, dset_path)
 
 
 if __name__ == "__main__":
