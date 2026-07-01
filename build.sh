@@ -1,1 +1,1 @@
-python3 str/main.py "/Bootblog/"
+python3 src/main.py "/Bootblog/"
